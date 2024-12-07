@@ -60,7 +60,7 @@ public class PermissionsPropertyDto {
     public static PermissionsPropertyDto FromPropertyDeclarationSyntax(PropertyDeclarationSyntax propertySyntax) {
         // Grabs the possible prefix value from the optional attribute.
         AttributeSyntax[] propertyAttributes = propertySyntax.AttributeLists.SelectMany(list => list.Attributes).ToArray();
-        AttributeSyntax? prefixSyntax = propertyAttributes.FirstOrDefault(attr => attr.Name.ToString() == "Prefix");
+        AttributeSyntax? prefixSyntax = propertyAttributes.FirstOrDefault(attr => attr.Name.ToString().EndsWith("Prefix"));
         string prefix = prefixSyntax?.ArgumentList?.Arguments.FirstOrDefault()?.Expression.ToString().Replace("\"", "") ?? string.Empty;
 
         // Determines if the property is static.
@@ -75,10 +75,7 @@ public class PermissionsPropertyDto {
             _ => "public"
         };
 
-        string propertyNameAsPermission = string.Join(
-            ".",
-            Regex.Split(propertySyntax.Identifier.ToString(), "(?<!^)(?=[A-Z])")
-        ).ToLowerInvariant();
+        string propertyNameAsPermission = ToPeriodSeperated(propertySyntax.Identifier.ToString());
 
         // Actual permission name
         string permissionName = string.IsNullOrEmpty(prefix)
@@ -132,4 +129,22 @@ public class PermissionsPropertyDto {
     public void ToUpperCase() {
         PermissionName = PermissionName.ToUpperInvariant();
     }
+
+    /// <summary>
+    ///     Converts a camelCase or PascalCase string into a period-separated lowercase string.
+    /// </summary>
+    /// <param name="input">The input string in camelCase or PascalCase format.</param>
+    /// <returns>
+    ///     A string where each word is separated by periods and all characters are in lowercase.
+    /// </returns>
+    private static string ToPeriodSeperated(string input) =>
+        string.Join(
+            ".",
+            Regex.Split(input, "(?<!^)(?=[A-Z])")
+        ).ToLowerInvariant();
+
+    /// <summary>
+    ///     Parses the static prefix of the property and converts it to a period-separated format in lowercase.
+    /// </summary>
+    public void ParsePrefix() => PermissionName = ToPeriodSeperated(PermissionName);
 }

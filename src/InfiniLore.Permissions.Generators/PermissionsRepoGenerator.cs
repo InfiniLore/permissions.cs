@@ -47,7 +47,7 @@ public class PermissionsRepoGenerator : IIncrementalGenerator {
         // Check if any of the attribute lists have the attribute we are looking for
         // Users can put multiple attribute collection on one class, this ensure we check all of them
         && classDeclarationSyntax.AttributeLists.Any(attrList =>
-            attrList.Attributes.Any(attr => attr.Name.ToString() == "PermissionsRepo")
+            attrList.Attributes.Any(attr => attr.Name.ToString().Contains("PermissionsRepo"))
         );
 
     /// <summary>
@@ -76,15 +76,15 @@ public class PermissionsRepoGenerator : IIncrementalGenerator {
             .ToArray();
 
         // Check enum flag parameter of the attribute
-        bool obfuscate = repoAttribute.ConstructorArguments.FirstOrDefault().Value is int flagObfuscate && (flagObfuscate & 1) != 0;
-        bool toUpperCase = repoAttribute.ConstructorArguments.FirstOrDefault().Value is int flagUppercase && (flagUppercase & 2) != 0;
+        int flagValue = (int)(repoAttribute.ConstructorArguments.FirstOrDefault().Value ?? -1);
 
         return new PermissionsRepoDto(
             classSymbol.Name,
             classSymbol.ContainingNamespace.ToDisplayString(),
             properties,
-            obfuscate,
-            toUpperCase
+            (flagValue & 0b1) != 0,
+            (flagValue & 0b10) != 0,
+            (flagValue & 0b100) != 0
         );
     }
 
@@ -109,6 +109,7 @@ public class PermissionsRepoGenerator : IIncrementalGenerator {
 
             foreach (PermissionsPropertyDto propertyDto in repoDto.Properties) {
                 // Obfuscate the permission name if required
+                if (repoDto.ParsePrefix) propertyDto.ParsePrefix();
                 if (repoDto.ObfuscateOutput) propertyDto.ObfuscatePermissionName(sha256, repoDto.ToUpperCase);
                 if (repoDto.ToUpperCase) propertyDto.ToUpperCase();
 

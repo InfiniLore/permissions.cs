@@ -11,7 +11,7 @@ namespace InfiniLore.Permissions.Generators;
 ///     whether the output should be obfuscated and whether property names should
 ///     be converted to uppercase.
 /// </summary>
-public readonly struct PermissionsRepoDto(string className, string nameSpace, PermissionsPropertyDto[] properties, bool obfuscate, bool toUpperCase) {
+public readonly struct PermissionsRepoDto(string className, string nameSpace, PermissionsPropertyDto[] properties, bool obfuscate, bool toUpperCase, bool parsePrefix) {
     /// <summary>
     ///     Represents the name of the class to be generated in the permissions' repository.
     /// </summary>
@@ -41,4 +41,11 @@ public readonly struct PermissionsRepoDto(string className, string nameSpace, Pe
     ///     Gets a value indicating whether the properties should be converted to upper case.
     /// </summary>
     public bool ToUpperCase { get; } = toUpperCase;
+
+
+    /// <summary>
+    ///     Indicates whether a prefix should be parsed when processing
+    ///     the properties related to permissions in the metadata struct.
+    /// </summary>
+    public bool ParsePrefix { get; } = parsePrefix;
 }
