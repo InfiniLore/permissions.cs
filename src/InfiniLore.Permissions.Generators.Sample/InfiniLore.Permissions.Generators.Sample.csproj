@@ -3,15 +3,12 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <RootNamespace>InfiniLore.Permissions.Generators.Sample</RootNamespace>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\InfiniLore.Permissions.Generators\InfiniLore.Permissions.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="DDD.UbiquitousLanguageRegistry.txt"/>
+        <ProjectReference Include="..\InfiniLore.Permissions\InfiniLore.Permissions.csproj" />
     </ItemGroup>
 
 </Project>
