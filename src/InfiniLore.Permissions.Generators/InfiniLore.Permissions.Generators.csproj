@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,7 +11,7 @@
         <IsRoslynComponent>true</IsRoslynComponent>
         
         <PackageId>InfiniLore.Permissions.Generators</PackageId>
-        <Version>0.1.0</Version>
+        <Version>0.2.0</Version>
         <Authors>Anna Sas</Authors>
         <Description>The Source Generator for InfiniLore.Permissions</Description>
         <PackageProjectUrl>https://github.com/InfiniLore/permissions.cs</PackageProjectUrl>
@@ -43,7 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
 
