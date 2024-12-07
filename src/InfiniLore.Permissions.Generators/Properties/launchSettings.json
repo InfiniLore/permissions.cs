@@ -1,0 +1,9 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "DebugRoslynSourceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../InfiniLore.Permissions.Generators.Sample/InfiniLore.Permissions.Generators.Sample.csproj"
+    }
+  }
+}

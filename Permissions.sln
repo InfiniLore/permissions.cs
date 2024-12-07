@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3C639AB0-E004-48C2-9CA9-A02B57C45D7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfiniLore.Permissions.Generators", "src\InfiniLore.Permissions.Generators\InfiniLore.Permissions.Generators.csproj", "{1DC208E0-A361-4CA9-BAE6-65772F0A220E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfiniLore.Permissions.Generators.Sample", "src\InfiniLore.Permissions.Generators.Sample\InfiniLore.Permissions.Generators.Sample.csproj", "{A8DFC492-5962-4D7F-87FE-83D919747BF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.InfiniLore.Permissions.Generators", "tests\Tests.InfiniLore.Permissions.Generators\Tests.InfiniLore.Permissions.Generators.csproj", "{B28D310A-3B23-426E-8715-3A1921646AA5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{495A9CB1-4510-4200-930F-9A10D46D572D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E793848E-9921-40AD-9503-FDFC6EAC966A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1DC208E0-A361-4CA9-BAE6-65772F0A220E} = {3C639AB0-E004-48C2-9CA9-A02B57C45D7B}
+		{A8DFC492-5962-4D7F-87FE-83D919747BF5} = {495A9CB1-4510-4200-930F-9A10D46D572D}
+		{B28D310A-3B23-426E-8715-3A1921646AA5} = {E793848E-9921-40AD-9503-FDFC6EAC966A}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DC208E0-A361-4CA9-BAE6-65772F0A220E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DC208E0-A361-4CA9-BAE6-65772F0A220E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DC208E0-A361-4CA9-BAE6-65772F0A220E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DC208E0-A361-4CA9-BAE6-65772F0A220E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8DFC492-5962-4D7F-87FE-83D919747BF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8DFC492-5962-4D7F-87FE-83D919747BF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8DFC492-5962-4D7F-87FE-83D919747BF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8DFC492-5962-4D7F-87FE-83D919747BF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B28D310A-3B23-426E-8715-3A1921646AA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B28D310A-3B23-426E-8715-3A1921646AA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B28D310A-3B23-426E-8715-3A1921646AA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B28D310A-3B23-426E-8715-3A1921646AA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
