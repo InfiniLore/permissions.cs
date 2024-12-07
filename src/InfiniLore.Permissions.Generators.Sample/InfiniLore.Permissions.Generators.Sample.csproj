@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\InfiniLore.Permissions.Generators\InfiniLore.Permissions.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\InfiniLore.Permissions\InfiniLore.Permissions.csproj" />
+        <ProjectReference Include="..\InfiniLore.Permissions\InfiniLore.Permissions.csproj"/>
     </ItemGroup>
 
 </Project>

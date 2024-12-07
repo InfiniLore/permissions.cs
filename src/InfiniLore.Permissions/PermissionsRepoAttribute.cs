@@ -2,11 +2,10 @@
 // Imports
 // ---------------------------------------------------------------------------------------------------------------------
 namespace InfiniLore.Permissions;
-
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-[AttributeUsage( AttributeTargets.Class )]
+[AttributeUsage(AttributeTargets.Class)]
 public class PermissionsRepoAttribute(GeneratorFlags flags = GeneratorFlags.Undefined) : Attribute {
     public GeneratorFlags Flags { get; } = flags;
 }

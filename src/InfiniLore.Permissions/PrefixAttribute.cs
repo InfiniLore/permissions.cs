@@ -2,11 +2,10 @@
 // Imports
 // ---------------------------------------------------------------------------------------------------------------------
 namespace InfiniLore.Permissions;
-
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class PrefixAttribute(string prefix): Attribute {
+public class PrefixAttribute(string prefix) : Attribute {
     public string Prefix { get; } = prefix;
 }
