@@ -4,6 +4,25 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <IsPackable>true</IsPackable>
+        <PackageId>InfiniLore.Permissions</PackageId>
+        <Version>0.1.0</Version> 
+        <Authors>Anna Sas</Authors>
+        <Description>Generate JWT permission strings with partial properties</Description>
+        <PackageProjectUrl>https://github.com/AterraEngine/unions-cs/</PackageProjectUrl>
+        <PackageTags>jwt-permissions;jwt</PackageTags>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <IncludeSymbols>true</IncludeSymbols>
+        <DebugType>embedded</DebugType>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
 
 </Project>

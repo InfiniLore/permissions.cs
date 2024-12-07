@@ -79,12 +79,12 @@ public class PermissionsRepoGenerator : IIncrementalGenerator {
         int flagValue = (int)(repoAttribute.ConstructorArguments.FirstOrDefault().Value ?? -1);
 
         return new PermissionsRepoDto(
-            classSymbol.Name,
-            classSymbol.ContainingNamespace.ToDisplayString(),
-            properties,
-            (flagValue & 0b1) != 0,
-            (flagValue & 0b10) != 0,
-            (flagValue & 0b100) != 0
+            className: classSymbol.Name,
+            nameSpace: classSymbol.ContainingNamespace.ToDisplayString(),
+            properties: properties,
+            obfuscate:   (flagValue & 0b1) != 0,
+            toUpperCase: (flagValue & 0b10) != 0,
+            parsePrefix: (flagValue & 0b100) != 0
         );
     }
 

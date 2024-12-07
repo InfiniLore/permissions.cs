@@ -131,20 +131,21 @@ public class PermissionsPropertyDto {
     }
 
     /// <summary>
-    ///     Converts a camelCase or PascalCase string into a period-separated lowercase string.
+    /// Converts a camelCase or PascalCase string into a period-separated lowercase string.
     /// </summary>
     /// <param name="input">The input string in camelCase or PascalCase format.</param>
     /// <returns>
-    ///     A string where each word is separated by periods and all characters are in lowercase.
+    /// A string where each word is separated by periods and all characters are in lowercase.
     /// </returns>
-    private static string ToPeriodSeperated(string input) =>
-        string.Join(
+    private static string ToPeriodSeperated(string input) {
+        return string.Join(
             ".",
             Regex.Split(input, "(?<!^)(?=[A-Z])")
         ).ToLowerInvariant();
+    }
 
     /// <summary>
-    ///     Parses the static prefix of the property and converts it to a period-separated format in lowercase.
+    /// Parses the static prefix of the property and converts it to a period-separated format in lowercase.
     /// </summary>
     public void ParsePrefix() => PermissionName = ToPeriodSeperated(PermissionName);
 }

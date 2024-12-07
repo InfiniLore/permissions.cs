@@ -10,5 +10,5 @@ public enum GeneratorFlags {
     Undefined = 0,
     Obfuscate = 1 << 0,
     ToUpperCase = 1 << 1,
-    ParsePrefix = 1 << 2
+    ParsePrefix = 1 << 2,
 }

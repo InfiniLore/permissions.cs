@@ -14,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E793848E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfiniLore.Permissions", "src\InfiniLore.Permissions\InfiniLore.Permissions.csproj", "{522072C9-B12E-43E0-A8B9-EE499EFA012F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{30717EB1-7E5D-4CB9-97C8-230240335A33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools.InfiniLore.Permissions", "tools\Tools.InfiniLore.Permissions\Tools.InfiniLore.Permissions.csproj", "{67C6B748-9272-4ED3-9CE3-3438667676DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +28,7 @@ Global
 		{A8DFC492-5962-4D7F-87FE-83D919747BF5} = {495A9CB1-4510-4200-930F-9A10D46D572D}
 		{B28D310A-3B23-426E-8715-3A1921646AA5} = {E793848E-9921-40AD-9503-FDFC6EAC966A}
 		{522072C9-B12E-43E0-A8B9-EE499EFA012F} = {3C639AB0-E004-48C2-9CA9-A02B57C45D7B}
+		{67C6B748-9272-4ED3-9CE3-3438667676DA} = {30717EB1-7E5D-4CB9-97C8-230240335A33}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1DC208E0-A361-4CA9-BAE6-65772F0A220E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -42,5 +47,9 @@ Global
 		{522072C9-B12E-43E0-A8B9-EE499EFA012F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{522072C9-B12E-43E0-A8B9-EE499EFA012F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{522072C9-B12E-43E0-A8B9-EE499EFA012F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67C6B748-9272-4ED3-9CE3-3438667676DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67C6B748-9272-4ED3-9CE3-3438667676DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67C6B748-9272-4ED3-9CE3-3438667676DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67C6B748-9272-4ED3-9CE3-3438667676DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
