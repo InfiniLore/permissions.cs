@@ -72,7 +72,7 @@ public readonly struct PermissionsStoreDto(ClassDeclarationSyntax classDeclarati
     /// <param name="context">The context for reporting diagnostics during source generation.</param>
     /// <returns>Returns true if the class is not partial and a diagnostic warning is reported; otherwise, false.</returns>
     public bool TryReportErrorIfNotPartial(SourceProductionContext context) {
-        if (ClassDeclaration.Members.Any(SyntaxKind.PartialKeyword)) return false;
+        if (ClassDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword)) return false;
 
         context.ReportDiagnostic(Diagnostic.Create(
             Rules.NonPartialClassWarning,
