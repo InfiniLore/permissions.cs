@@ -47,7 +47,7 @@ public class PermissionsPropertyDtoTests {
             PermissionName = "sample.permission"
         };
 
-        string expected = "public partial string SampleProperty { get => \"sample.permission\"; }";
+        const string expected = "public partial string SampleProperty { get => \"sample.permission\"; }";
         Assert.Equal(expected, dto.ToPropertyString());
     }
 
@@ -66,26 +66,36 @@ public class PermissionsPropertyDtoTests {
         Assert.Equal(expectedOutput, dto.PermissionName); // Obfuscated should be the same across runs.
     }
 
-    [Fact]
-    public void ToUpperCase_ShouldConvertToUpperCorrectly() {
+    [Theory]
+    [InlineData("sample.permission", "SAMPLE.PERMISSION")]
+    [InlineData("test.permission", "TEST.PERMISSION")]
+    [InlineData("mixed.Case.Permission", "MIXED.CASE.PERMISSION")]
+    [InlineData("another.test.case", "ANOTHER.TEST.CASE")]
+    [InlineData("UpperCaseAlready", "UPPERCASEALREADY")]
+    public void ToUpperCase_ShouldConvertToUpperCorrectly(string input, string expectedOutput) {
         var dto = new PermissionsPropertyDto {
-            PermissionName = "sample.permission"
+            PermissionName = input
         };
 
         dto.ToUpperInvariant();
 
-        Assert.Equal("SAMPLE.PERMISSION", dto.PermissionName);
+        Assert.Equal(expectedOutput, dto.PermissionName);
     }
 
-    [Fact]
-    public void ParsePrefix_ShouldConvertToPeriodSeparated() {
+    [Theory]
+    [InlineData("SampleProperty", "sample.property")]
+    [InlineData("Sample.Property", "sample.property")]
+    [InlineData("SampleTwo.Property", "sample.two.property")]
+    [InlineData("DataUsers.duckies.public", "data.users.duckies.public")]
+    [InlineData("DataUsersDuckiesPublic", "data.users.duckies.public")]
+    public void ParsePrefix_ShouldConvertToPeriodSeparated(string input, string expectedOutput) {
         var dto = new PermissionsPropertyDto {
-            PermissionName = "SampleProperty"
+            PermissionName = input
         };
 
         dto.ParsePrefix();
 
-        Assert.Equal("sample.property", dto.PermissionName);
+        Assert.Equal(expectedOutput, dto.PermissionName);
     }
 
     [Theory]
