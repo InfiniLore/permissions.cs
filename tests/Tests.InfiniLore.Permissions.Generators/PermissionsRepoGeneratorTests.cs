@@ -5,9 +5,12 @@ using InfiniLore.Permissions;
 using InfiniLore.Permissions.Generators;
 using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -15,21 +18,37 @@ namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<PermissionsRepoGenerator> {
+public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<PermissionsStoreGenerator> {
     protected override Assembly[] ReferenceAssemblies { get; } = [
         typeof(object).Assembly,
         typeof(ValueTuple).Assembly,
         typeof(Attribute).Assembly,
         typeof(Console).Assembly,
         Assembly.Load("System.Runtime"),
-        typeof(PermissionsRepoAttribute).Assembly,
+        typeof(PermissionsStoreAttribute).Assembly,
         typeof(GeneratorFlags).Assembly,
         typeof(PrefixAttribute).Assembly,
+        typeof(Regex).Assembly
     ];
     
     // -----------------------------------------------------------------------------------------------------------------
     // Methods
     // -----------------------------------------------------------------------------------------------------------------
+    [Fact]
+    public void IsRepoClassCandidate_ShouldRecognizeCandidate() {
+        const string classCode = """
+            [PermissionsStore]
+            public partial class SampleClass { }
+            """;
+
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(classCode);
+        SyntaxNode node = tree.GetCompilationUnitRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+        
+        bool result = PermissionsStoreGenerator.IsRepoClassCandidate(node, default);
+
+        Assert.True(result, "The class with PermissionsStore attribute should be recognized as a candidate.");
+    }
+    
     [Theory]
     [InlineData(SinglePermission, SinglePermissionOutput, "Permissions")]
     [InlineData(DifferentAccessModifiers, DifferentAccessModifiersOutput, "Permissions")]
@@ -38,6 +57,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     [InlineData(ObfuscationUppercase, ObfuscationUppercaseOutput, "Permissions")]
     [InlineData(ParsePrefix, ParsePrefixOutput, "Permissions")]
     [InlineData(ParsePrefixUpperCase, ParsePrefixUpperCaseOutput, "ParsePrefixUpperCasePermissions")]
+    [InlineData(MultiplePrefixes, MultiplePrefixesOutput, "MultiplePrefixesPermissions")]
     public async Task TestText(string inputText, string expectedOutput, string repoName) {
         GeneratorDriverRunResult runResult = await RunGeneratorAsync(inputText);
         
@@ -61,7 +81,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region SinglePermission Test
     [LanguageInjection("csharp")] private const string SinglePermission = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo]
+            [InfiniLore.Permissions.PermissionsStore]
             public static partial class Permissions {
                 [InfiniLore.Permissions.Prefix("data.users")] public static partial string DuckiesRead { get; }
             }
@@ -82,7 +102,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region DifferentAccessModifiers Test
     [LanguageInjection("csharp")] private const string DifferentAccessModifiers = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo]
+            [InfiniLore.Permissions.PermissionsStore]
             public static partial class Permissions {
                 [InfiniLore.Permissions.Prefix("data.users")] public static partial string DuckiesPublic { get; }
                 [InfiniLore.Permissions.Prefix("data.users")] private static partial string DuckiesPrivate { get; }
@@ -114,7 +134,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region Obfuscation Test
     [LanguageInjection("csharp")] private const string Obfuscation = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo(InfiniLore.Permissions.GeneratorFlags.Obfuscate)]
+            [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.Obfuscate)]
             public static partial class Permissions {
                 [InfiniLore.Permissions.Prefix("data.users")] public static partial string DuckiesPublic { get; }
                 [InfiniLore.Permissions.Prefix("data.users")] private static partial string DuckiesPrivate { get; }
@@ -147,7 +167,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region Obfuscation Test
     [LanguageInjection("csharp")] private const string ObfuscationUppercase = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo(InfiniLore.Permissions.GeneratorFlags.Obfuscate | InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
+            [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.Obfuscate | InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
             public static partial class Permissions {
                 [InfiniLore.Permissions.Prefix("data.users")] public static partial string DuckiesPublic { get; }
                 [InfiniLore.Permissions.Prefix("data.users")] private static partial string DuckiesPrivate { get; }
@@ -180,7 +200,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region ToUpperCase Test
     [LanguageInjection("csharp")] private const string ToUpperCase = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo(InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
+            [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
             public static partial class Permissions {
                 [InfiniLore.Permissions.Prefix("data.users")] public static partial string DuckiesPublic { get; }
                 [InfiniLore.Permissions.Prefix("data.users")] private static partial string DuckiesPrivate { get; }
@@ -212,7 +232,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region ParsePrefix Test
     [LanguageInjection("csharp")] private const string ParsePrefix = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo(InfiniLore.Permissions.GeneratorFlags.ParsePrefix)]
+            [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.ParsePrefix)]
             public static partial class Permissions {
                 private const string DataUsers = nameof(DataUsers);
                 
@@ -246,7 +266,7 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
     #region ParsePrefixUpperCase Test
     [LanguageInjection("csharp")] private const string ParsePrefixUpperCase = """
         namespace TestNamespace {
-            [InfiniLore.Permissions.PermissionsRepo(InfiniLore.Permissions.GeneratorFlags.ParsePrefix | InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
+            [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.ParsePrefix | InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
             public static partial class ParsePrefixUpperCasePermissions {
                 private const string DataUsers = nameof(DataUsers);
                 
@@ -273,6 +293,50 @@ public class PermissionsRepoGeneratorTests : IncrementalGeneratorTest<Permission
             public static partial string SomethingPublic { get => "SOMETHING.PUBLIC"; }
             private static partial string SomethingPrivate { get => "SOMETHING.PRIVATE"; }
             internal static partial string SomethingInternal { get => "SOMETHING.INTERNAL"; }
+        }
+        """;
+    #endregion
+
+    #region MultiplePrefixes Test
+    [LanguageInjection("csharp")] private const string MultiplePrefixes = """
+        namespace TestNamespace {
+            [InfiniLore.Permissions.PermissionsStore()]
+            public static partial class MultiplePrefixesPermissions {
+                private const string Data = nameof(Data);
+                private const string Users = nameof(Users);
+                private const string Something = nameof(Something);
+                private const string Else = nameof(Else);
+                
+                [InfiniLore.Permissions.Prefix(Data, Users)] public static partial string DuckiesPublic { get; }
+                [InfiniLore.Permissions.Prefix(Data, Users)] private static partial string DuckiesPrivate { get; }
+                [InfiniLore.Permissions.Prefix(Data, Users)] internal static partial string DuckiesInternal { get; }
+                                
+                [InfiniLore.Permissions.Prefix(Data), InfiniLore.Permissions.Prefix(Something) ]public static partial string SomethingPublic { get; }
+                [InfiniLore.Permissions.Prefix(Data), InfiniLore.Permissions.Prefix(Something) ]private static partial string SomethingPrivate { get; }
+                [InfiniLore.Permissions.Prefix(Data), InfiniLore.Permissions.Prefix(Something) ]internal static partial string SomethingInternal { get; }
+                
+                [InfiniLore.Permissions.Prefix(Data)] [InfiniLore.Permissions.Prefix(Else)] public static partial string ElsePublic { get; }
+                [InfiniLore.Permissions.Prefix(Data)] [InfiniLore.Permissions.Prefix(Else)] private static partial string ElsePrivate { get; }
+                [InfiniLore.Permissions.Prefix(Data)] [InfiniLore.Permissions.Prefix(Else)] internal static partial string ElseInternal { get; }
+            }
+        }
+
+        """;
+
+    [LanguageInjection("csharp")] private const string MultiplePrefixesOutput = """
+        // <auto-generated />
+        namespace TestNamespace;
+
+        public partial class MultiplePrefixesPermissions {
+            public static partial string DuckiesPublic { get => "data.users.duckies.public"; }
+            private static partial string DuckiesPrivate { get => "data.users.duckies.private"; }
+            internal static partial string DuckiesInternal { get => "data.users.duckies.internal"; }
+            public static partial string SomethingPublic { get => "data.something.something.public"; }
+            private static partial string SomethingPrivate { get => "data.something.something.private"; }
+            internal static partial string SomethingInternal { get => "data.something.something.internal"; }
+            public static partial string ElsePublic { get => "data.else.else.public"; }
+            private static partial string ElsePrivate { get => "data.else.else.private"; }
+            internal static partial string ElseInternal { get => "data.else.else.internal"; }
         }
         """;
     #endregion

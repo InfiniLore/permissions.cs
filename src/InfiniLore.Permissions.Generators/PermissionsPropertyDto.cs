@@ -23,14 +23,14 @@ public class PermissionsPropertyDto {
     /// <summary>
     ///     Represents the access modifier of a property within the PermissionsPropertyDto class.
     /// </summary>
-    private string AccessModifier { get; set; } = default!;
+    internal string AccessModifier { get; set; } = default!;
 
     /// <summary>
     ///     Represents the prefix indicating whether a property is static.
     ///     This property returns the string "static " if the property is marked as static, otherwise it returns an empty
     ///     string.
     /// </summary>
-    private string StaticPrefix { get; set; } = default!;
+    internal string StaticPrefix { get; set; } = default!;
 
     /// <summary>
     ///     Gets or sets the name of the property.
@@ -39,12 +39,12 @@ public class PermissionsPropertyDto {
     ///     management system and plays a crucial role in mapping and modifying permission-related data
     ///     according to specific attributes and rules defined in the associated class.
     /// </summary>
-    private string PropertyName { get; set; } = default!;
+    internal string PropertyName { get; set; } = default!;
 
     /// <summary>
     ///     Gets or sets the name of the permission associated with the property.
     /// </summary>
-    private string PermissionName { get; set; } = default!;
+    internal string PermissionName { get; set; } = default!;
 
     // -----------------------------------------------------------------------------------------------------------------
     // Constructors
@@ -59,9 +59,14 @@ public class PermissionsPropertyDto {
     /// </returns>
     public static PermissionsPropertyDto FromPropertyDeclarationSyntax(PropertyDeclarationSyntax propertySyntax) {
         // Grabs the possible prefix value from the optional attribute.
-        AttributeSyntax[] propertyAttributes = propertySyntax.AttributeLists.SelectMany(list => list.Attributes).ToArray();
-        AttributeSyntax? prefixSyntax = propertyAttributes.FirstOrDefault(attr => attr.Name.ToString().EndsWith("Prefix"));
-        string prefix = prefixSyntax?.ArgumentList?.Arguments.FirstOrDefault()?.Expression.ToString().Replace("\"", "") ?? string.Empty;
+        string[] arguments = propertySyntax.AttributeLists
+            .SelectMany(static list => list.Attributes)
+            .Where(static attr => attr.Name.ToString().EndsWith("Prefix") && attr.ArgumentList is not null)
+            .SelectMany(static attr => attr.ArgumentList!.Arguments)
+            .Select(static attr => attr.Expression.ToString().Replace("\"", ""))
+            .ToArray();
+        
+        string prefix = string.Join(".", arguments);
 
         // Determines if the property is static.
         string staticPrefix = propertySyntax.Modifiers.Any(SyntaxKind.StaticKeyword) ? "static " : string.Empty;
@@ -126,9 +131,12 @@ public class PermissionsPropertyDto {
     /// <summary>
     ///     Converts the permission name to upper case using the invariant culture.
     /// </summary>
-    public void ToUpperCase() {
-        PermissionName = PermissionName.ToUpperInvariant();
-    }
+    public void ToUpperInvariant() => PermissionName = PermissionName.ToUpperInvariant();
+
+    /// <summary>
+    ///     Converts the permission name to lower case using the invariant culture.
+    /// </summary>
+    public void ToLowerInvariant() => PermissionName = PermissionName.ToLowerInvariant();
 
     /// <summary>
     /// Converts a camelCase or PascalCase string into a period-separated lowercase string.
@@ -137,10 +145,10 @@ public class PermissionsPropertyDto {
     /// <returns>
     /// A string where each word is separated by periods and all characters are in lowercase.
     /// </returns>
-    private static string ToPeriodSeperated(string input) {
+    internal static string ToPeriodSeperated(string input) {
         return string.Join(
             ".",
-            Regex.Split(input, "(?<!^)(?=[A-Z])")
+            Regex.Split(input, @"(?<!^|\.)(?=[A-Z])")
         ).ToLowerInvariant();
     }
 
@@ -148,4 +156,5 @@ public class PermissionsPropertyDto {
     /// Parses the static prefix of the property and converts it to a period-separated format in lowercase.
     /// </summary>
     public void ParsePrefix() => PermissionName = ToPeriodSeperated(PermissionName);
+    
 }

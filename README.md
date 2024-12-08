@@ -5,27 +5,27 @@ InfiniLore.Permissions is a lightweight library designed to provide robust and d
 ## Features
 
 - **Attribute-based Configuration:** Easily annotate your classes and properties with custom attributes to define permission repositories with ease.
-- **Automatic Code Generation:** Generate source code for permission repository classes using the `PermissionsRepoGenerator` to streamline permission handling.
+- **Automatic Code Generation:** Generate source code for permission repository classes using the `PermissionsStoreGenerator` to streamline permission handling.
 - **Flexible Property Management:** Supports various property configurations including static properties and customization of access modifiers.
 - **Advanced Naming Options:** Includes features such as prefix parsing, obfuscation, and case formatting for enhanced security and readability.
 
 ## Components
 
-### PermissionsRepoGenerator
+### PermissionsStoreGenerator
 
 The main class responsible for generating source code for permission repository classes. 
-It operates by registering syntax nodes that qualify as candidates based on the `PermissionsRepo` attribute using Roslyn's incremental generator APIs.
+It operates by registering syntax nodes that qualify as candidates based on the `PermissionsStore` attribute using Roslyn's incremental generator APIs.
 
 ### Attributes
 
-- **PermissionsRepoAttribute:** Used to annotate classes that should be considered as permission repositories.
+- **PermissionsStoreAttribute:** Used to annotate classes that should be considered as permission repositories.
 - **PrefixAttribute:** Allows a specified prefix to be attached to permission names, enhancing naming consistency and organization.
 
 ## Usage
 
 To integrate InfiniLore.Permissions in your project:
 
-1. Decorate your partial classes with the `PermissionsRepoAttribute` to specify them as target for code generation.
+1. Decorate your partial classes with the `PermissionsStoreAttribute` to specify them as target for code generation.
 2. Annotate the properties with `PrefixAttribute` if you require prefixing permission names.
 3. Build your solution which will trigger the code generator to produce the necessary classes.
 
@@ -37,7 +37,7 @@ Here's a quick example on how to define a permission repository:
 ```csharp
 using InfiniLore.Permissions;
 
-[PermissionsRepo(GeneratorFlags.ParsePrefix)]
+[PermissionsStore(GeneratorFlags.ParsePrefix)]
 public static partial class Permissions {
     [Prefix("data.user")] public static partial string LorescopesRead { get; }
 }
