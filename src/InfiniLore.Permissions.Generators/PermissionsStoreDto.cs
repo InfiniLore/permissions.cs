@@ -1,6 +1,10 @@
 ﻿// ---------------------------------------------------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------------------------------------------------
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 namespace InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
@@ -11,7 +15,20 @@ namespace InfiniLore.Permissions.Generators;
 ///     whether the output should be obfuscated and whether property names should
 ///     be converted to uppercase.
 /// </summary>
-public readonly struct PermissionsStoreDto(string className, string nameSpace, PermissionsPropertyDto[] properties, bool obfuscate, bool toUpperCase, bool parsePrefix) {
+public readonly struct PermissionsStoreDto(ClassDeclarationSyntax classDeclaration, ISymbol classSymbol, string className, string nameSpace, PermissionsPropertyDto[] properties, bool obfuscate, bool toUpperCase, bool parsePrefix) {
+    /// <summary>
+    ///     Gets the syntax node representing the class declaration, allowing access
+    ///     to the structural syntax details of the class related to permissions.
+    /// </summary>
+    public ClassDeclarationSyntax ClassDeclaration { get; } = classDeclaration;
+
+    /// <summary>
+    ///     Gets the symbol representing the class, providing access to the
+    ///     semantic information associated with the class as defined within
+    ///     the source code.
+    /// </summary>
+    public ISymbol ClassSymbol { get; } = classSymbol;
+    
     /// <summary>
     ///     Represents the name of the class to be generated in the permissions' repository.
     /// </summary>
@@ -48,4 +65,20 @@ public readonly struct PermissionsStoreDto(string className, string nameSpace, P
     ///     the properties related to permissions in the metadata struct.
     /// </summary>
     public bool ParsePrefix { get; } = parsePrefix;
+
+    /// <summary>
+    ///     Checks if the class declaration does not contain a 'partial' keyword and reports a diagnostic warning if it is not partial.
+    /// </summary>
+    /// <param name="context">The context for reporting diagnostics during source generation.</param>
+    /// <returns>Returns true if the class is not partial and a diagnostic warning is reported; otherwise, false.</returns>
+    public bool TryReportErrorIfNotPartial(SourceProductionContext context) {
+        if (ClassDeclaration.Members.Any(SyntaxKind.PartialKeyword)) return false;
+
+        context.ReportDiagnostic(Diagnostic.Create(
+            Rules.NonPartialClassWarning,
+            ClassDeclaration.GetLocation(),
+            ClassSymbol.Name
+        ));
+        return true;
+    }
 }
