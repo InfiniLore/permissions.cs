@@ -43,13 +43,13 @@ public class PermissionsStoreGenerator : IIncrementalGenerator {
     /// <returns>True if the syntax node is a candidate for a Permissions Repository class; otherwise, false.</returns>
     internal static bool IsRepoClassCandidate(SyntaxNode node, CancellationToken token) =>
         node is ClassDeclarationSyntax { AttributeLists.Count: > 0, Modifiers: var modifiers } classDeclarationSyntax
-        && modifiers.Any(SyntaxKind.PartialKeyword)
+            && modifiers.Any(SyntaxKind.PartialKeyword)
 
-        // Check if any of the attribute lists have the attribute we are looking for
-        // Users can put multiple attribute collection on one class, this ensure we check all of them
-        && classDeclarationSyntax.AttributeLists.Any(attrList =>
-            attrList.Attributes.Any(attr => attr.Name.ToString().Contains("PermissionsStore"))
-        );
+            // Check if any of the attribute lists have the attribute we are looking for
+            // Users can put multiple attribute collection on one class, this ensure we check all of them
+            && classDeclarationSyntax.AttributeLists.Any(attrList =>
+                attrList.Attributes.Any(attr => attr.Name.ToString().Contains("PermissionsStore"))
+            );
 
     /// <summary>
     ///     Gathers data from a specified class declaration and returns a <see cref="PermissionsStoreDto" />.
