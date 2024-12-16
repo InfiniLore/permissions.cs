@@ -3,7 +3,8 @@ name: Publish Packages
 on:
   push:
     tags:
-      - 'v*.*.*' # Match version tags like v1.0.0
+      - 'v*.*.*'    # Match version tags like v1.0.0
+      - 'v*.*.*-*'  # Match version tags like v1.0.0-alpha, v1.0.0-beta, etc...
 
 jobs:
   test:
