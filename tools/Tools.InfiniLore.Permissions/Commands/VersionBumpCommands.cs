@@ -5,6 +5,7 @@ using AterraEngine.Unions;
 using CliArgsParser;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -15,7 +16,7 @@ namespace Tools.InfiniLore.Permissions.Commands;
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-public class VersionBumpCommands : ICommandAtlas {
+public partial class VersionBumpCommands : ICommandAtlas {
     
     [Command<VersionBumpParameters>("bump")]
     public async Task VersionBumpCommand(VersionBumpParameters args) {
@@ -132,11 +133,15 @@ public class VersionBumpCommands : ICommandAtlas {
             if (versionElement == null) {
                 return new Failure<string>($"File {projectFile} did not contain a version element");
             }
+            
+            Match match = FindVersionRegex().Match(versionElement.Value);
+            if (!match.Success) return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
 
-            string[] versionParts = versionElement.Value.Split('.').Take(3).ToArray();
-            if (versionParts.Length >= 3) {
-                return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
-            }
+            string[] versionParts = [
+                match.Groups["major"].Value,
+                match.Groups["minor"].Value,
+                match.Groups["patch"].Value,
+            ];
 
             switch (sectionToBump) {
                 case VersionSection.Major: {
@@ -198,4 +203,7 @@ public class VersionBumpCommands : ICommandAtlas {
             ? new Success<string>(versionToReturn)
             : new Failure<string>("Could not find a version to bump");
     }
+
+    [GeneratedRegex(@"^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)")]
+    private static partial Regex FindVersionRegex();
 }
