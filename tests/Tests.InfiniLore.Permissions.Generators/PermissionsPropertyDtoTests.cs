@@ -59,7 +59,7 @@ public class PermissionsPropertyDtoTests {
         };
 
         using var hasher = SHA256.Create();
-        dto.ObfuscatePermissionName(hasher, false);
+        dto.ObfuscatePermissionName(hasher);
 
         Assert.NotEmpty(dto.PermissionName);
         Assert.Equal(5, dto.PermissionName.Length);

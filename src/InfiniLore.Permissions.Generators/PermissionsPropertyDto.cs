@@ -117,7 +117,7 @@ public class PermissionsPropertyDto {
     ///     A boolean value indicating whether the obfuscated permission name should be converted to
     ///     uppercase.
     /// </param>
-    public void ObfuscatePermissionName(HashAlgorithm hasher, bool toUpperCase) {
+    public void ObfuscatePermissionName(HashAlgorithm hasher) {
         byte[] bytes = hasher.ComputeHash(Encoding.UTF8.GetBytes(PermissionName));
         string hash = Regex.Replace(Convert.ToBase64String(bytes), "[+/=]", string.Empty);
 

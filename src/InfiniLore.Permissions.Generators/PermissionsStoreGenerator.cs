@@ -118,7 +118,7 @@ public class PermissionsStoreGenerator : IIncrementalGenerator {
                 // Obfuscate the permission name if required
                 if (repoDto.ParsePrefix) propertyDto.ParsePrefix();
                 propertyDto.ToLowerInvariant(); // Only try and do to LowerInvariant after we've parsed the prefix, otherwise the ParsePrefix will fail
-                if (repoDto.ObfuscateOutput) propertyDto.ObfuscatePermissionName(sha256, repoDto.ToUpperCase);
+                if (repoDto.ObfuscateOutput) propertyDto.ObfuscatePermissionName(sha256);
                 if (repoDto.ToUpperCase) propertyDto.ToUpperInvariant();
 
                 // Add the property to the class
