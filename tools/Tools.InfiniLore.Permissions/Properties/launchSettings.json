@@ -2,19 +2,19 @@
   "profiles": {
     "Major Version Bump": {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"major\" -push"
+      "commandLineArgs": "bump -section=\"major\""
     },
     "Minor Version Bump": {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"minor\" -push"
+      "commandLineArgs": "bump -section=\"minor\""
     },
     "Patch Version Bump": {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"patch\" -push"
+      "commandLineArgs": "bump -section=\"patch\""
     },
     "Preview Version Bump" : {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"preview\" -push"
+      "commandLineArgs": "bump -section=\"preview\""
     }
   }
 }

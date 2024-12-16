@@ -5,7 +5,6 @@ using AterraEngine.Unions;
 using CliArgsParser;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -16,7 +15,7 @@ namespace Tools.InfiniLore.Permissions.Commands;
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-public partial class VersionBumpCommands : ICommandAtlas {
+public class VersionBumpCommands : ICommandAtlas {
     
     [Command<VersionBumpParameters>("bump")]
     public async Task VersionBumpCommand(VersionBumpParameters args) {
@@ -113,7 +112,7 @@ public partial class VersionBumpCommands : ICommandAtlas {
         ];
         VersionSection sectionToBump = args.Section;
         string? versionToReturn = null;
-        string? addendum = null;
+        SemanticVersionDto? versionDto = null;
 
         foreach (string projectFile in projectFiles) {
             string path = Path.Combine(args.Root, projectFile);
@@ -135,56 +134,16 @@ public partial class VersionBumpCommands : ICommandAtlas {
                 return new Failure<string>($"File {projectFile} did not contain a version element");
             }
             
-            Match match = FindVersionRegex().Match(versionElement.Value);
-            if (!match.Success) return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
-
-            string[] versionParts = [
-                match.Groups["major"].Value,
-                match.Groups["minor"].Value,
-                match.Groups["patch"].Value,
-            ];
-
-            switch (sectionToBump) {
-                case VersionSection.Major: {
-                    versionParts[0] = (int.Parse(versionParts[0]) + 1).ToString();
-                    versionParts[1] = "0";
-                    versionParts[2] = "0";
-                    break;
-                }
-
-                case VersionSection.Minor: {
-                    versionParts[1] = (int.Parse(versionParts[1]) + 1).ToString();
-                    versionParts[2] = "0";
-                    break;
-                }
-
-                case VersionSection.Patch: {
-                    // Remove possible addendum string
-                    versionParts[2] = (int.Parse(versionParts[2].Split('-')[0]) + 1).ToString();
-                    break;
-                }
-
-                case VersionSection.Preview: {
-                    if (addendum is null) {
-                        // Get User Input only once
-                        Console.WriteLine("Enter Addendum string (leave blank for default value)");
-                        Console.Write("$:> ");
-                        addendum = Console.ReadLine() ?? string.Empty;
-                        if (string.IsNullOrWhiteSpace(addendum)) {
-                            addendum = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-                        }
-                    }
-                    versionParts[2] = $"{versionParts[2].Split('-')[0]}-preview.{addendum}";
-                    break;
-                }
-
-                case VersionSection.None:
-                default: {
-                    return new Failure<string>($"Invalid version section {sectionToBump}");
-                }
+            if (versionDto is null) {
+                if (!SemanticVersionDto.TryParse(versionElement.Value, out SemanticVersionDto? dto)) 
+                    return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
+                
+                dto.BumpVersion(sectionToBump);
+                
+                versionDto = dto;
             }
 
-            versionElement.Value = versionToReturn ??= string.Join(".", versionParts);
+            versionElement.Value = versionDto.ToString();
 
             var settings = new XmlWriterSettings {
                 Indent = true,
@@ -204,7 +163,4 @@ public partial class VersionBumpCommands : ICommandAtlas {
             ? new Success<string>(versionToReturn)
             : new Failure<string>("Could not find a version to bump");
     }
-
-    [GeneratedRegex(@"^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)")]
-    private static partial Regex FindVersionRegex();
 }
