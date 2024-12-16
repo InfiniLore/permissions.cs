@@ -14,7 +14,7 @@
     },
     "Preview Version Bump" : {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"\" -push"
+      "commandLineArgs": "bump -section=\"preview\" -push"
     }
   }
 }

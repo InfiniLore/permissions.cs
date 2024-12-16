@@ -121,7 +121,7 @@ public class VersionBumpCommands : ICommandAtlas {
 
             XDocument document;
             await using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true)) {
-                document = await XDocument.LoadAsync(stream, LoadOptions.PreserveWhitespace, default);
+                document = await XDocument.LoadAsync(stream, LoadOptions.PreserveWhitespace, CancellationToken.None);
             }
 
             XElement? versionElement = document
@@ -133,8 +133,8 @@ public class VersionBumpCommands : ICommandAtlas {
                 return new Failure<string>($"File {projectFile} did not contain a version element");
             }
 
-            string[] versionParts = versionElement.Value.Split('.');
-            if (versionParts.Length != 3) {
+            string[] versionParts = versionElement.Value.Split('.').Take(3).ToArray();
+            if (versionParts.Length >= 3) {
                 return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
             }
 
