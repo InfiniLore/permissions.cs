@@ -111,6 +111,7 @@ public class VersionBumpCommands : ICommandAtlas {
         ];
         VersionSection sectionToBump = args.Section;
         string? versionToReturn = null;
+        string? addendum = null;
 
         foreach (string projectFile in projectFiles) {
             string path = Path.Combine(args.Root, projectFile);
@@ -158,12 +159,14 @@ public class VersionBumpCommands : ICommandAtlas {
                 }
 
                 case VersionSection.Addendum: {
-                    // Get User Input
-                    Console.WriteLine("Enter Addendum string (leave blank for default value)");
-                    Console.Write("$:> ");
-                    string addendum = Console.ReadLine() ?? string.Empty;
-                    if (string.IsNullOrWhiteSpace(addendum)) {
-                        addendum = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                    if (addendum is null) {
+                        // Get User Input only once
+                        Console.WriteLine("Enter Addendum string (leave blank for default value)");
+                        Console.Write("$:> ");
+                        addendum = Console.ReadLine() ?? string.Empty;
+                        if (string.IsNullOrWhiteSpace(addendum)) {
+                            addendum = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                        }
                     }
                     versionParts[2] = $"{versionParts[2]}-{addendum}";
                     break;
