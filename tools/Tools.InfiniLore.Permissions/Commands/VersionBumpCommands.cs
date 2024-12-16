@@ -20,13 +20,13 @@ public class VersionBumpCommands : ICommandAtlas {
     [Command<VersionBumpParameters>("bump")]
     public async Task VersionBumpCommand(VersionBumpParameters args) {
         Console.WriteLine("Bumping version...");
-        SuccessOrFailure<string> bumpResult = await BumpVersion(args);
+        SuccessOrFailure<SemanticVersionDto> bumpResult = await BumpVersion(args);
         if (bumpResult is { IsFailure: true, AsFailure.Value: var errorBumping }) {
             Console.WriteLine(errorBumping);
             return;
         }
 
-        string updatedVersion = bumpResult.AsSuccess.Value;
+        SemanticVersionDto updatedVersion = bumpResult.AsSuccess.Value;
 
         Console.WriteLine("Git committing ...");
         SuccessOrFailure gitCommitResult = await TryCreateGitCommit(updatedVersion);
@@ -105,13 +105,12 @@ public class VersionBumpCommands : ICommandAtlas {
     }
 
 
-    private static async Task<SuccessOrFailure<string>> BumpVersion(VersionBumpParameters args) {
+    private static async Task<SuccessOrFailure<SemanticVersionDto>> BumpVersion(VersionBumpParameters args) {
         string[] projectFiles = [
             "src/InfiniLore.Permissions/InfiniLore.Permissions.csproj",
             "src/InfiniLore.Permissions.Generators/InfiniLore.Permissions.Generators.csproj"
         ];
         VersionSection sectionToBump = args.Section;
-        string? versionToReturn = null;
         SemanticVersionDto? versionDto = null;
 
         foreach (string projectFile in projectFiles) {
@@ -159,8 +158,8 @@ public class VersionBumpCommands : ICommandAtlas {
             Console.WriteLine($"Updated {projectFile} version to {versionElement.Value}");
         }
 
-        return versionToReturn is not null
-            ? new Success<string>(versionToReturn)
+        return versionDto is not null
+            ? new Success<SemanticVersionDto>(versionDto)
             : new Failure<string>("Could not find a version to bump");
     }
 }
