@@ -2,19 +2,19 @@
   "profiles": {
     "Major Version Bump": {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"major\""
+      "commandLineArgs": "bump -section=\"major\" -push-to-remote"
     },
     "Minor Version Bump": {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"minor\""
+      "commandLineArgs": "bump -section=\"minor\" -push-to-remote"
     },
     "Patch Version Bump": {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"patch\""
+      "commandLineArgs": "bump -section=\"patch\" -push-to-remote"
     },
     "Alpha Version Bump" : {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"addendum\""
+      "commandLineArgs": "bump -section=\"addendum\" -push-to-remote"
     }
   }
 }
