@@ -23,12 +23,12 @@ jobs:
         run: dotnet restore Permissions.sln
 
       - name: Build
-        run: dotnet test Permissions.sln --no-build --configuration Release --verbosity normal
+        run: dotnet build Permissions.sln --configuration Release --no-restore
             
       # Ensure that the tests must pass 
       # The job will fail automatically if any test fails because `dotnet test` exits with a non-zero code
-      -   name: Run tests
-          run: dotnet test tests/ --no-build --verbosity normal
+      - name: Run tests
+        run: dotnet test Permissions.sln --no-build --verbosity normal
 
       - name: Publish to NuGet
         env:
