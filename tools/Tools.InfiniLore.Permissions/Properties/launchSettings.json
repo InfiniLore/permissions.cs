@@ -11,6 +11,10 @@
     "Patch Version Bump": {
       "commandName": "Project",
       "commandLineArgs": "bump -section=\"patch\""
+    },
+    "Alpha Version Bump" : {
+      "commandName": "Project",
+      "commandLineArgs": "bump -section=\"addendum\""
     }
   }
 }

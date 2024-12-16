@@ -10,7 +10,7 @@ namespace Tools.InfiniLore.Permissions;
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
 internal static class Program {
-    public async static Task Main(string[] args) {
+    public static async Task Main(string[] args) {
         IServiceCollection serviceCollection = new ServiceCollection();
 
         serviceCollection.AddCliArgsParser(configuration =>
