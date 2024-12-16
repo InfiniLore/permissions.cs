@@ -3,37 +3,12 @@ name: Publish Packages
 on:
   push:
     tags:
-      - 'v*.*.*' # Match version tags like v1.0.0
+      - 'v*.*.*'    # Match version tags like v1.0.0
+      - 'v*.*.*-preview.*'  # Match version tags like v1.0.0-preview.0, etc...
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '9.x' # Adjust the version as needed
-
-      - name: Install dependencies
-        run: dotnet restore
-
-      - name: Build the solution
-        run: dotnet build --no-restore
-
-        # Ensure that the tests must pass 
-        # The job will fail automatically if any test fails because `dotnet test` exits with a non-zero code
-      - name: Run tests
-        run: dotnet test --no-build --verbosity normal
-
   publish:
-    
     runs-on: ubuntu-latest
-    
-    needs: test
 
     steps:
       - name: Checkout repository
@@ -49,6 +24,12 @@ jobs:
 
       - name: Build
         run: dotnet build Permissions.sln --configuration Release --no-restore
+            
+      # Ensure that the tests must pass 
+      # The job will fail automatically if any test fails because `dotnet test` exits with a non-zero code
+      - name: Run tests
+        run: dotnet run -c Release
+        working-directory: "tests/Tests.InfiniLore.Permissions.Generators"
 
       - name: Publish to NuGet
         env:

@@ -20,13 +20,13 @@ public class VersionBumpCommands : ICommandAtlas {
     [Command<VersionBumpParameters>("bump")]
     public async Task VersionBumpCommand(VersionBumpParameters args) {
         Console.WriteLine("Bumping version...");
-        SuccessOrFailure<string> bumpResult = await BumpVersion(args);
+        SuccessOrFailure<SemanticVersionDto> bumpResult = await BumpVersion(args);
         if (bumpResult is { IsFailure: true, AsFailure.Value: var errorBumping }) {
             Console.WriteLine(errorBumping);
             return;
         }
 
-        string updatedVersion = bumpResult.AsSuccess.Value;
+        SemanticVersionDto updatedVersion = bumpResult.AsSuccess.Value;
 
         Console.WriteLine("Git committing ...");
         SuccessOrFailure gitCommitResult = await TryCreateGitCommit(updatedVersion);
@@ -45,6 +45,7 @@ public class VersionBumpCommands : ICommandAtlas {
         Console.WriteLine($"Version {updatedVersion} committed and tagged successfully.");
 
         if (args.PushToRemote) {
+            Console.WriteLine("Pushing to origin ...");
             SuccessOrFailure pushResult = await TryPushToOrigin();
             if (pushResult is { IsFailure: true, AsFailure.Value: var errorPushing }) {
                 Console.WriteLine(errorPushing);
@@ -71,7 +72,7 @@ public class VersionBumpCommands : ICommandAtlas {
         return new Success();
     }
 
-    private static async Task<SuccessOrFailure> TryCreateGitTag(string updatedVersion) {
+    private static async Task<SuccessOrFailure> TryCreateGitTag(SemanticVersionDto updatedVersion) {
         var gitTagInfo = new ProcessStartInfo("git", "tag v" + updatedVersion) {
             RedirectStandardOutput = true,
             UseShellExecute = false,
@@ -87,7 +88,7 @@ public class VersionBumpCommands : ICommandAtlas {
         return new Success();
     }
 
-    private static async Task<SuccessOrFailure> TryCreateGitCommit(string updatedVersion) {
+    private static async Task<SuccessOrFailure> TryCreateGitCommit(SemanticVersionDto updatedVersion) {
         var gitCommitInfo = new ProcessStartInfo("git", $"commit -am \"VersionBump : v{updatedVersion}\"") {
             RedirectStandardOutput = true,
             UseShellExecute = false,
@@ -104,14 +105,13 @@ public class VersionBumpCommands : ICommandAtlas {
     }
 
 
-    private static async Task<SuccessOrFailure<string>> BumpVersion(VersionBumpParameters args) {
+    private static async Task<SuccessOrFailure<SemanticVersionDto>> BumpVersion(VersionBumpParameters args) {
         string[] projectFiles = [
             "src/InfiniLore.Permissions/InfiniLore.Permissions.csproj",
             "src/InfiniLore.Permissions.Generators/InfiniLore.Permissions.Generators.csproj"
         ];
         VersionSection sectionToBump = args.Section;
-        string? versionToReturn = null;
-        string? addendum = null;
+        SemanticVersionDto? versionDto = null;
 
         foreach (string projectFile in projectFiles) {
             string path = Path.Combine(args.Root, projectFile);
@@ -121,7 +121,7 @@ public class VersionBumpCommands : ICommandAtlas {
 
             XDocument document;
             await using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true)) {
-                document = await XDocument.LoadAsync(stream, LoadOptions.PreserveWhitespace, default);
+                document = await XDocument.LoadAsync(stream, LoadOptions.PreserveWhitespace, CancellationToken.None);
             }
 
             XElement? versionElement = document
@@ -132,53 +132,17 @@ public class VersionBumpCommands : ICommandAtlas {
             if (versionElement == null) {
                 return new Failure<string>($"File {projectFile} did not contain a version element");
             }
-
-            string[] versionParts = versionElement.Value.Split('.');
-            if (versionParts.Length != 3) {
-                return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
+            
+            if (versionDto is null) {
+                if (!SemanticVersionDto.TryParse(versionElement.Value, out SemanticVersionDto? dto)) 
+                    return new Failure<string>($"File {projectFile} contained an invalid version element: {versionElement.Value}");
+                
+                dto.BumpVersion(sectionToBump);
+                
+                versionDto = dto;
             }
 
-            switch (sectionToBump) {
-                case VersionSection.Major: {
-                    versionParts[0] = (int.Parse(versionParts[0]) + 1).ToString();
-                    versionParts[1] = "0";
-                    versionParts[2] = "0";
-                    break;
-                }
-
-                case VersionSection.Minor: {
-                    versionParts[1] = (int.Parse(versionParts[1]) + 1).ToString();
-                    versionParts[2] = "0";
-                    break;
-                }
-
-                case VersionSection.Patch: {
-                    // Remove possible addendum string
-                    versionParts[2] = (int.Parse(versionParts[2].Split('-')[0]) + 1).ToString();
-                    break;
-                }
-
-                case VersionSection.Addendum: {
-                    if (addendum is null) {
-                        // Get User Input only once
-                        Console.WriteLine("Enter Addendum string (leave blank for default value)");
-                        Console.Write("$:> ");
-                        addendum = Console.ReadLine() ?? string.Empty;
-                        if (string.IsNullOrWhiteSpace(addendum)) {
-                            addendum = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-                        }
-                    }
-                    versionParts[2] = $"{versionParts[2]}-{addendum}";
-                    break;
-                }
-
-                case VersionSection.None:
-                default: {
-                    return new Failure<string>($"Invalid version section {sectionToBump}");
-                }
-            }
-
-            versionElement.Value = versionToReturn ??= string.Join(".", versionParts);
+            versionElement.Value = versionDto.ToString();
 
             var settings = new XmlWriterSettings {
                 Indent = true,
@@ -194,8 +158,8 @@ public class VersionBumpCommands : ICommandAtlas {
             Console.WriteLine($"Updated {projectFile} version to {versionElement.Value}");
         }
 
-        return versionToReturn is not null
-            ? new Success<string>(versionToReturn)
+        return versionDto is not null
+            ? new Success<SemanticVersionDto>(versionDto)
             : new Failure<string>("Could not find a version to bump");
     }
 }
