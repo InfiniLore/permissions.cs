@@ -28,7 +28,8 @@ jobs:
       # Ensure that the tests must pass 
       # The job will fail automatically if any test fails because `dotnet test` exits with a non-zero code
       - name: Run tests
-        run: dotnet test Permissions.sln --no-build --verbosity normal
+        run: dotnet run -c Release
+        working-directory: "tests/Tests.InfiniLore.Permissions.Generators"
 
       - name: Publish to NuGet
         env:
