@@ -12,9 +12,9 @@
       "commandName": "Project",
       "commandLineArgs": "bump -section=\"patch\" -push"
     },
-    "Alpha Version Bump" : {
+    "Preview Version Bump" : {
       "commandName": "Project",
-      "commandLineArgs": "bump -section=\"addendum\" -push"
+      "commandLineArgs": "bump -section=\"preview\" -push"
     }
   }
 }

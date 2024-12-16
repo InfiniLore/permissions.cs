@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'    # Match version tags like v1.0.0
-      - 'v*.*.*-*'  # Match version tags like v1.0.0-alpha, v1.0.0-beta, etc...
+      - 'v*.*.*-preview.*'  # Match version tags like v1.0.0-preview.0, etc...
 
 jobs:
   test:

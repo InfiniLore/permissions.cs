@@ -158,7 +158,7 @@ public class VersionBumpCommands : ICommandAtlas {
                     break;
                 }
 
-                case VersionSection.Addendum: {
+                case VersionSection.Preview: {
                     if (addendum is null) {
                         // Get User Input only once
                         Console.WriteLine("Enter Addendum string (leave blank for default value)");
@@ -168,7 +168,7 @@ public class VersionBumpCommands : ICommandAtlas {
                             addendum = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
                         }
                     }
-                    versionParts[2] = $"{versionParts[2].Split('-')[0]}-{addendum}";
+                    versionParts[2] = $"{versionParts[2].Split('-')[0]}-preview.{addendum}";
                     break;
                 }
 
