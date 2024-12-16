@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using System.Security.Cryptography;
-using Xunit;
+using System.Threading.Tasks;
 
 namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -16,8 +16,8 @@ namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
 [TestSubject(typeof(PermissionsPropertyDto))]
 public class PermissionsPropertyDtoTests {
-    [Fact]
-    public void FromPropertyDeclarationSyntax_ShouldConvertCorrectly() {
+    [Test]
+    public async Task FromPropertyDeclarationSyntax_ShouldConvertCorrectly() {
         const string code = """
             public class TestClass
             {
@@ -26,20 +26,21 @@ public class PermissionsPropertyDtoTests {
             }
             """;
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
-        PropertyDeclarationSyntax propertyNode = syntaxTree.GetRoot()
+        PropertyDeclarationSyntax propertyNode = (await syntaxTree.GetRootAsync())
             .DescendantNodes().OfType<PropertyDeclarationSyntax>()
             .First();
 
         PermissionsPropertyDto dto = PermissionsPropertyDto.FromPropertyDeclarationSyntax(propertyNode);
-
-        Assert.Equal("public", dto.AccessModifier);
-        Assert.Equal(string.Empty, dto.StaticPrefix);
-        Assert.Equal("SampleProperty", dto.PropertyName);
-        Assert.Equal("Test.sample.property", dto.PermissionName);
+        
+        await Assert.That(dto).IsNotNull();
+        await Assert.That(dto.AccessModifier).IsEqualTo("public");
+        await Assert.That(dto.StaticPrefix).IsEqualTo(string.Empty);
+        await Assert.That(dto.PropertyName).IsEqualTo("SampleProperty");
+        await Assert.That(dto.PermissionName).IsEqualTo("Test.sample.property");
     }
 
-    [Fact]
-    public void ToPropertyString_ShouldReturnCorrectFormat() {
+    [Test]
+    public async Task ToPropertyString_ShouldReturnCorrectFormat() {
         var dto = new PermissionsPropertyDto {
             AccessModifier = "public",
             StaticPrefix = "",
@@ -48,12 +49,13 @@ public class PermissionsPropertyDtoTests {
         };
 
         const string expected = "public partial string SampleProperty { get => \"sample.permission\"; }";
-        Assert.Equal(expected, dto.ToPropertyString());
+        
+        await Assert.That(dto.ToPropertyString()).IsEqualTo(expected);
     }
 
-    [Theory]
-    [InlineData("sample.permission", "aihuI")]
-    public void ObfuscatePermissionName_ShouldObfuscateCorrectly(string input, string expectedOutput) {
+    [Test]
+    [Arguments("sample.permission", "aihuI")]
+    public async Task ObfuscatePermissionName_ShouldObfuscateCorrectly(string input, string expectedOutput) {
         var dto = new PermissionsPropertyDto {
             PermissionName = input
         };
@@ -61,50 +63,54 @@ public class PermissionsPropertyDtoTests {
         using var hasher = SHA256.Create();
         dto.ObfuscatePermissionName(hasher);
 
-        Assert.NotEmpty(dto.PermissionName);
-        Assert.Equal(5, dto.PermissionName.Length);
-        Assert.Equal(expectedOutput, dto.PermissionName); // Obfuscated should be the same across runs.
+        await Assert.That(dto.PermissionName).IsNotEmpty();
+        await Assert.That(dto.PermissionName).IsEqualTo(expectedOutput);  // Obfuscated should be the same across runs.
+        await Assert.That(dto.PermissionName.Length).IsEqualTo(5);
     }
 
-    [Theory]
-    [InlineData("sample.permission", "SAMPLE.PERMISSION")]
-    [InlineData("test.permission", "TEST.PERMISSION")]
-    [InlineData("mixed.Case.Permission", "MIXED.CASE.PERMISSION")]
-    [InlineData("another.test.case", "ANOTHER.TEST.CASE")]
-    [InlineData("UpperCaseAlready", "UPPERCASEALREADY")]
-    public void ToUpperCase_ShouldConvertToUpperCorrectly(string input, string expectedOutput) {
+    [Test]
+    [Arguments("sample.permission", "SAMPLE.PERMISSION")]
+    [Arguments("test.permission", "TEST.PERMISSION")]
+    [Arguments("mixed.Case.Permission", "MIXED.CASE.PERMISSION")]
+    [Arguments("another.test.case", "ANOTHER.TEST.CASE")]
+    [Arguments("UpperCaseAlready", "UPPERCASEALREADY")]
+    public async Task ToUpperCase_ShouldConvertToUpperCorrectly(string input, string expectedOutput) {
         var dto = new PermissionsPropertyDto {
             PermissionName = input
         };
 
         dto.ToUpperInvariant();
 
-        Assert.Equal(expectedOutput, dto.PermissionName);
+        await Assert.That(dto.PermissionName).IsNotEmpty();
+        await Assert.That(dto.PermissionName).IsEqualTo(expectedOutput);
     }
 
-    [Theory]
-    [InlineData("SampleProperty", "sample.property")]
-    [InlineData("Sample.Property", "sample.property")]
-    [InlineData("SampleTwo.Property", "sample.two.property")]
-    [InlineData("DataUsers.duckies.public", "data.users.duckies.public")]
-    [InlineData("DataUsersDuckiesPublic", "data.users.duckies.public")]
-    public void ParsePrefix_ShouldConvertToPeriodSeparated(string input, string expectedOutput) {
+    [Test]
+    [Arguments("SampleProperty", "sample.property")]
+    [Arguments("Sample.Property", "sample.property")]
+    [Arguments("SampleTwo.Property", "sample.two.property")]
+    [Arguments("DataUsers.duckies.public", "data.users.duckies.public")]
+    [Arguments("DataUsersDuckiesPublic", "data.users.duckies.public")]
+    public async Task ParsePrefix_ShouldConvertToPeriodSeparated(string input, string expectedOutput) {
         var dto = new PermissionsPropertyDto {
             PermissionName = input
         };
 
         dto.ParsePrefix();
 
-        Assert.Equal(expectedOutput, dto.PermissionName);
+        await Assert.That(dto.PermissionName).IsNotEmpty();
+        await Assert.That(dto.PermissionName).IsEqualTo(expectedOutput);
     }
 
-    [Theory]
-    [InlineData("SampleProperty", "sample.property")]
-    [InlineData("Sample.Property", "sample.property")]
-    [InlineData("SampleTwo.Property", "sample.two.property")]
-    [InlineData("DataUsers.duckies.public", "data.users.duckies.public")]
-    public void ToPeriodSeperated_ShouldConvertCamelCaseToPeriodSeparated(string input, string expectedOutput) {
+    [Test]
+    [Arguments("SampleProperty", "sample.property")]
+    [Arguments("Sample.Property", "sample.property")]
+    [Arguments("SampleTwo.Property", "sample.two.property")]
+    [Arguments("DataUsers.duckies.public", "data.users.duckies.public")]
+    public async Task ToPeriodSeperated_ShouldConvertCamelCaseToPeriodSeparated(string input, string expectedOutput) {
         string result = PermissionsPropertyDto.ToPeriodSeperated(input);
-        Assert.Equal(expectedOutput, result);
+        
+        await Assert.That(result).IsNotEmpty();
+        await Assert.That(result).IsEqualTo(expectedOutput);
     }
 }

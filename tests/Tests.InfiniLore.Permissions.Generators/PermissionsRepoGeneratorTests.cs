@@ -11,20 +11,20 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<PermissionsStoreGenerator> {
+public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<PermissionsStoreGenerator> {
     protected override Assembly[] ReferenceAssemblies { get; } = [
         typeof(object).Assembly,
         typeof(ValueTuple).Assembly,
         typeof(Attribute).Assembly,
         typeof(Console).Assembly,
-        Assembly.Load("System.Runtime"),
+        System.Reflection.Assembly.Load("System.Runtime"),
         typeof(PermissionsStoreAttribute).Assembly,
         typeof(GeneratorFlags).Assembly,
         typeof(PrefixAttribute).Assembly,
@@ -34,8 +34,8 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     // -----------------------------------------------------------------------------------------------------------------
     // Methods
     // -----------------------------------------------------------------------------------------------------------------
-    [Fact]
-    public void IsRepoClassCandidate_ShouldRecognizeCandidate() {
+    [Test]
+    public async Task IsRepoClassCandidate_ShouldRecognizeCandidate() {
         const string classCode = """
             [PermissionsStore]
             public partial class SampleClass { }
@@ -44,20 +44,20 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
         SyntaxTree tree = CSharpSyntaxTree.ParseText(classCode);
         SyntaxNode node = tree.GetCompilationUnitRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().First();
         
-        bool result = PermissionsStoreGenerator.IsRepoClassCandidate(node, default);
+        bool result = PermissionsStoreGenerator.IsRepoClassCandidate(node, CancellationToken.None);
 
-        Assert.True(result, "The class with PermissionsStore attribute should be recognized as a candidate.");
+        await Assert.That(result).IsTrue().Because("The class with PermissionsStore attribute should be recognized as a candidate.");
     }
     
-    [Theory]
-    [InlineData(SinglePermission, SinglePermissionOutput, "Permissions")]
-    [InlineData(DifferentAccessModifiers, DifferentAccessModifiersOutput, "Permissions")]
-    [InlineData(ToUpperCase, ToUpperCaseOutput, "Permissions")]
-    [InlineData(Obfuscation, ObfuscationOutput, "Permissions")]
-    [InlineData(ObfuscationUppercase, ObfuscationUppercaseOutput, "Permissions")]
-    [InlineData(ParsePrefix, ParsePrefixOutput, "Permissions")]
-    [InlineData(ParsePrefixUpperCase, ParsePrefixUpperCaseOutput, "ParsePrefixUpperCasePermissions")]
-    [InlineData(MultiplePrefixes, MultiplePrefixesOutput, "MultiplePrefixesPermissions")]
+    [Test]
+    [Arguments(SinglePermission, SinglePermissionOutput, "Permissions")]
+    [Arguments(DifferentAccessModifiers, DifferentAccessModifiersOutput, "Permissions")]
+    [Arguments(ToUpperCase, ToUpperCaseOutput, "Permissions")]
+    [Arguments(Obfuscation, ObfuscationOutput, "Permissions")]
+    [Arguments(ObfuscationUppercase, ObfuscationUppercaseOutput, "Permissions")]
+    [Arguments(ParsePrefix, ParsePrefixOutput, "Permissions")]
+    [Arguments(ParsePrefixUpperCase, ParsePrefixUpperCaseOutput, "ParsePrefixUpperCasePermissions")]
+    [Arguments(MultiplePrefixes, MultiplePrefixesOutput, "MultiplePrefixesPermissions")]
     public async Task TestText(string inputText, string expectedOutput, string repoName) {
         GeneratorDriverRunResult runResult = await RunGeneratorAsync(inputText);
         
@@ -65,21 +65,17 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
             .SelectMany(result => result.GeneratedSources)
             .SingleOrDefault(result => result.HintName.EndsWith($"{repoName}.g.cs"));
 
-        Assert.NotNull(generatedSource?.SourceText);
-        Assert.Equal(
-            expectedOutput.Trim(),
-            generatedSource.Value.SourceText.ToString().Trim(),
-            ignoreLineEndingDifferences: true,
-            ignoreWhiteSpaceDifferences: true
-        );
-        
+        await Assert.That(generatedSource?.SourceText).IsNotNull();
+        await Assert
+            .That(FindEmptyLines().Replace(generatedSource?.SourceText.ToString().Trim() ?? string.Empty, ""))
+            .IsEqualTo(FindEmptyLines().Replace(expectedOutput.Trim(), ""));
     }
     
     // -----------------------------------------------------------------------------------------------------------------
     // Test cases
     // -----------------------------------------------------------------------------------------------------------------
     #region SinglePermission Test
-    [LanguageInjection("csharp")] private const string SinglePermission = """
+    [LanguageInjection("csharp")] public const string SinglePermission = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore]
             public static partial class Permissions {
@@ -89,7 +85,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
         
         """;
 
-    [LanguageInjection("csharp")] private const string SinglePermissionOutput = """
+    [LanguageInjection("csharp")] public const string SinglePermissionOutput = """
         // <auto-generated />
         namespace TestNamespace;
 
@@ -100,7 +96,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
 
     #region DifferentAccessModifiers Test
-    [LanguageInjection("csharp")] private const string DifferentAccessModifiers = """
+    [LanguageInjection("csharp")] public const string DifferentAccessModifiers = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore]
             public static partial class Permissions {
@@ -116,7 +112,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string DifferentAccessModifiersOutput = """
+    [LanguageInjection("csharp")] public const string DifferentAccessModifiersOutput = """
         // <auto-generated />
         namespace TestNamespace;
 
@@ -132,7 +128,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
 
     #region Obfuscation Test
-    [LanguageInjection("csharp")] private const string Obfuscation = """
+    [LanguageInjection("csharp")] public const string Obfuscation = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.Obfuscate)]
             public static partial class Permissions {
@@ -148,7 +144,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string ObfuscationOutput = """
+    [LanguageInjection("csharp")] public const string ObfuscationOutput = """
         // <auto-generated />
         namespace TestNamespace;
         
@@ -165,7 +161,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
     
     #region Obfuscation Test
-    [LanguageInjection("csharp")] private const string ObfuscationUppercase = """
+    [LanguageInjection("csharp")] public const string ObfuscationUppercase = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.Obfuscate | InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
             public static partial class Permissions {
@@ -181,7 +177,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string ObfuscationUppercaseOutput = """
+    [LanguageInjection("csharp")] public const string ObfuscationUppercaseOutput = """
         // <auto-generated />
         namespace TestNamespace;
         
@@ -198,7 +194,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
 
     #region ToUpperCase Test
-    [LanguageInjection("csharp")] private const string ToUpperCase = """
+    [LanguageInjection("csharp")] public const string ToUpperCase = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
             public static partial class Permissions {
@@ -214,7 +210,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string ToUpperCaseOutput = """
+    [LanguageInjection("csharp")] public const string ToUpperCaseOutput = """
         // <auto-generated />
         namespace TestNamespace;
 
@@ -230,7 +226,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
 
     #region ParsePrefix Test
-    [LanguageInjection("csharp")] private const string ParsePrefix = """
+    [LanguageInjection("csharp")] public const string ParsePrefix = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.ParsePrefix)]
             public static partial class Permissions {
@@ -248,7 +244,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string ParsePrefixOutput = """
+    [LanguageInjection("csharp")] public const string ParsePrefixOutput = """
         // <auto-generated />
         namespace TestNamespace;
         
@@ -264,7 +260,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
 
     #region ParsePrefixUpperCase Test
-    [LanguageInjection("csharp")] private const string ParsePrefixUpperCase = """
+    [LanguageInjection("csharp")] public const string ParsePrefixUpperCase = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore(InfiniLore.Permissions.GeneratorFlags.ParsePrefix | InfiniLore.Permissions.GeneratorFlags.ToUpperCase)]
             public static partial class ParsePrefixUpperCasePermissions {
@@ -282,7 +278,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string ParsePrefixUpperCaseOutput = """
+    [LanguageInjection("csharp")] public const string ParsePrefixUpperCaseOutput = """
         // <auto-generated />
         namespace TestNamespace;
 
@@ -298,7 +294,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
     #endregion
 
     #region MultiplePrefixes Test
-    [LanguageInjection("csharp")] private const string MultiplePrefixes = """
+    [LanguageInjection("csharp")] public const string MultiplePrefixes = """
         namespace TestNamespace {
             [InfiniLore.Permissions.PermissionsStore()]
             public static partial class MultiplePrefixesPermissions {
@@ -323,7 +319,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
 
         """;
 
-    [LanguageInjection("csharp")] private const string MultiplePrefixesOutput = """
+    [LanguageInjection("csharp")] public const string MultiplePrefixesOutput = """
         // <auto-generated />
         namespace TestNamespace;
 
@@ -341,4 +337,7 @@ public class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<Permissio
         """;
     #endregion
     
+    [GeneratedRegex(@"^\s*$\n|\r", RegexOptions.Multiline)]
+    private static partial Regex FindEmptyLines();
+
 }
