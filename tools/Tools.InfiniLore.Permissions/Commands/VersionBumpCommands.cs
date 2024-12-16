@@ -168,7 +168,7 @@ public class VersionBumpCommands : ICommandAtlas {
                             addendum = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
                         }
                     }
-                    versionParts[2] = $"{versionParts[2]}-{addendum}";
+                    versionParts[2] = $"{versionParts[2].Split('-')[0]}-{addendum}";
                     break;
                 }
 
