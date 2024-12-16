@@ -72,7 +72,7 @@ public class VersionBumpCommands : ICommandAtlas {
         return new Success();
     }
 
-    private static async Task<SuccessOrFailure> TryCreateGitTag(string updatedVersion) {
+    private static async Task<SuccessOrFailure> TryCreateGitTag(SemanticVersionDto updatedVersion) {
         var gitTagInfo = new ProcessStartInfo("git", "tag v" + updatedVersion) {
             RedirectStandardOutput = true,
             UseShellExecute = false,
@@ -88,7 +88,7 @@ public class VersionBumpCommands : ICommandAtlas {
         return new Success();
     }
 
-    private static async Task<SuccessOrFailure> TryCreateGitCommit(string updatedVersion) {
+    private static async Task<SuccessOrFailure> TryCreateGitCommit(SemanticVersionDto updatedVersion) {
         var gitCommitInfo = new ProcessStartInfo("git", $"commit -am \"VersionBump : v{updatedVersion}\"") {
             RedirectStandardOutput = true,
             UseShellExecute = false,

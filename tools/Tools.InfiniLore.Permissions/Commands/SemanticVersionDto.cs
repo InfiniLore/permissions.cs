@@ -49,11 +49,13 @@ public partial class SemanticVersionDto {
             case VersionSection.Minor: {
                 Minor += 1;
                 Patch = 0;
+                Preview = null;
                 break;
             }
 
             case VersionSection.Patch: {
                 Patch += 1;
+                Preview = null;
                 break;
             }
 
