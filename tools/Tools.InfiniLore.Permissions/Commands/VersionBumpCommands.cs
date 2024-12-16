@@ -46,6 +46,7 @@ public partial class VersionBumpCommands : ICommandAtlas {
         Console.WriteLine($"Version {updatedVersion} committed and tagged successfully.");
 
         if (args.PushToRemote) {
+            Console.WriteLine("Pushing to origin ...");
             SuccessOrFailure pushResult = await TryPushToOrigin();
             if (pushResult is { IsFailure: true, AsFailure.Value: var errorPushing }) {
                 Console.WriteLine(errorPushing);
