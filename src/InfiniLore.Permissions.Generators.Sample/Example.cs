@@ -5,7 +5,7 @@ namespace InfiniLore.Permissions.Generators.Sample;
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-[PermissionsStore(GeneratorFlags.ParsePrefix)]
+[PermissionsStore(GeneratorFlags.ParsePrefix | GeneratorFlags.GenerateAllPermissionsMethod)]
 public static partial class Permissions {
     private const string DataUser = nameof(DataUser);
     private const string Data = nameof(Data);

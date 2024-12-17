@@ -107,7 +107,8 @@ public class PermissionsPropertyDto {
     ///     the property name and permission name.
     /// </returns>
     public string ToPropertyString() => $"{AccessModifier} {StaticPrefix}partial string {PropertyName} {{ get => \"{PermissionName}\"; }}";
-
+    public string ToYieldString() => $"yield return {PropertyName};";
+    
     /// <summary>
     ///     Obfuscates the permission name of the current instance using a specified hash algorithm and optionally converts it
     ///     to uppercase.

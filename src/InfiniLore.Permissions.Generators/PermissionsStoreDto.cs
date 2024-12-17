@@ -15,7 +15,7 @@ namespace InfiniLore.Permissions.Generators;
 ///     whether the output should be obfuscated and whether property names should
 ///     be converted to uppercase.
 /// </summary>
-public readonly struct PermissionsStoreDto(ClassDeclarationSyntax classDeclaration, ISymbol classSymbol, string className, string nameSpace, PermissionsPropertyDto[] properties, bool obfuscate, bool toUpperCase, bool parsePrefix) {
+public readonly struct PermissionsStoreDto(ClassDeclarationSyntax classDeclaration, ISymbol classSymbol, string className, string nameSpace, PermissionsPropertyDto[] properties, bool obfuscate, bool toUpperCase, bool parsePrefix, bool generateAllPermissionsMethod) {
     /// <summary>
     ///     Gets the syntax node representing the class declaration, allowing access
     ///     to the structural syntax details of the class related to permissions.
@@ -66,6 +66,15 @@ public readonly struct PermissionsStoreDto(ClassDeclarationSyntax classDeclarati
     /// </summary>
     public bool ParsePrefix { get; } = parsePrefix;
 
+
+    /// <summary>
+    /// Specifies whether  to generate a "AllPermissions" method should be included
+    /// in the output for the class. When true, the generator produces a method
+    /// that aggregates all defined permissions, facilitating their centralized
+    /// management and access.
+    /// </summary>
+    public bool GenerateAllPermissionsMethod { get; } = generateAllPermissionsMethod;
+    
     /// <summary>
     ///     Checks if the class declaration does not contain a 'partial' keyword and reports a diagnostic warning if it is not partial.
     /// </summary>

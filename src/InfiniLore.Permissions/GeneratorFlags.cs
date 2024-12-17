@@ -11,4 +11,5 @@ public enum GeneratorFlags {
     Obfuscate = 1 << 0,
     ToUpperCase = 1 << 1,
     ParsePrefix = 1 << 2,
+    GenerateAllPermissionsMethod = 1 << 3
 }
