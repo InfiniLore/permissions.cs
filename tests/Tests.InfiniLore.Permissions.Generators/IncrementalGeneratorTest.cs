@@ -3,10 +3,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------

@@ -6,9 +6,7 @@ using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
@@ -63,8 +61,8 @@ public class PermissionsPropertyDtoTests {
         using var hasher = SHA256.Create();
         dto.ObfuscatePermissionName(hasher);
 
-        await Assert.That(dto.PermissionName).IsNotEmpty();
-        await Assert.That(dto.PermissionName).IsEqualTo(expectedOutput);  // Obfuscated should be the same across runs.
+        await Assert.That(dto.PermissionName).IsNotEmpty()
+            .And.IsEqualTo(expectedOutput);
         await Assert.That(dto.PermissionName.Length).IsEqualTo(5);
     }
 
@@ -81,8 +79,8 @@ public class PermissionsPropertyDtoTests {
 
         dto.ToUpperInvariant();
 
-        await Assert.That(dto.PermissionName).IsNotEmpty();
-        await Assert.That(dto.PermissionName).IsEqualTo(expectedOutput);
+        await Assert.That(dto.PermissionName).IsNotEmpty()
+            .And.IsEqualTo(expectedOutput);
     }
 
     [Test]
@@ -98,8 +96,8 @@ public class PermissionsPropertyDtoTests {
 
         dto.ParsePrefix();
 
-        await Assert.That(dto.PermissionName).IsNotEmpty();
-        await Assert.That(dto.PermissionName).IsEqualTo(expectedOutput);
+        await Assert.That(dto.PermissionName).IsNotEmpty()
+            .And.IsEqualTo(expectedOutput);
     }
 
     [Test]
@@ -110,7 +108,9 @@ public class PermissionsPropertyDtoTests {
     public async Task ToPeriodSeperated_ShouldConvertCamelCaseToPeriodSeparated(string input, string expectedOutput) {
         string result = PermissionsPropertyDto.ToPeriodSeperated(input);
         
-        await Assert.That(result).IsNotEmpty();
-        await Assert.That(result).IsEqualTo(expectedOutput);
+        
+        
+        await Assert.That(result).IsNotEmpty()
+            .And.IsEqualTo(expectedOutput);
     }
 }
