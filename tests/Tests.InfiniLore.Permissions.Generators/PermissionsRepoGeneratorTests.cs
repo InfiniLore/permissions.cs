@@ -21,6 +21,7 @@ public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<P
         typeof(Attribute).Assembly,
         typeof(Console).Assembly,
         System.Reflection.Assembly.Load("System.Runtime"),
+        
         typeof(PermissionsStoreAttribute).Assembly,
         typeof(GeneratorFlags).Assembly,
         typeof(PrefixAttribute).Assembly,
