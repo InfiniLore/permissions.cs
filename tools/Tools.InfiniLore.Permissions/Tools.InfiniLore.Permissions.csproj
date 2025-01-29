@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AterraEngine.Unions" Version="2.7.1" />
-      <PackageReference Include="CodeOfChaos.CliArgsParser.Library" Version="4.3.3" />
+      <PackageReference Include="AterraEngine.Unions" Version="3.8.0" />
+      <PackageReference Include="CodeOfChaos.CliArgsParser.Library" Version="4.5.0" />
     </ItemGroup>
 
 </Project>
