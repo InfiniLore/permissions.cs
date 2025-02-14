@@ -1,6 +1,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------------------------------------------------
+using CodeOfChaos.Testing.TUnit;
 using InfiniLore.Permissions;
 using InfiniLore.Permissions.Generators;
 using JetBrains.Annotations;
@@ -14,8 +15,8 @@ namespace Tests.InfiniLore.Permissions.Generators;
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<PermissionsStoreGenerator> {
-    protected override Assembly[] ReferenceAssemblies { get; } = [
+public class PermissionsStoreGeneratorTests {
+    private static Assembly[] ReferenceAssemblies { get; } = [
         typeof(object).Assembly,
         typeof(ValueTuple).Assembly,
         typeof(Attribute).Assembly,
@@ -45,7 +46,7 @@ public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<P
 
         await Assert.That(result).IsTrue().Because("The class with PermissionsStore attribute should be recognized as a candidate.");
     }
-    
+
     [Test]
     [Arguments(SinglePermission, SinglePermissionOutput, "Permissions")]
     [Arguments(DifferentAccessModifiers, DifferentAccessModifiersOutput, "Permissions")]
@@ -57,16 +58,22 @@ public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<P
     [Arguments(MultiplePrefixes, MultiplePrefixesOutput, "MultiplePrefixesPermissions")]
     [Arguments(GenerateAllPermissionsMethod, GenerateAllPermissionsMethodOutput, "GenerateAllPermissionsMethodPermissions")]
     public async Task TestText(string inputText, string expectedOutput, string repoName) {
-        GeneratorDriverRunResult runResult = await RunGeneratorAsync(inputText);
-        
-        GeneratedSourceResult? generatedSource = runResult.Results
-            .SelectMany(result => result.GeneratedSources)
-            .SingleOrDefault(result => result.HintName.EndsWith($"{repoName}.g.cs"));
+        // Arrange
+        RoslynGeneratorRunner runner = await new RoslynCompilationRunner()
+            .AddReferences(ReferenceAssemblies)
+            .AddDocument("Test.cs", inputText)
+            .GetGeneratorRunnerAsync();
 
-        await Assert.That(generatedSource?.SourceText).IsNotNull();
-        await Assert
-            .That(FindEmptyLines().Replace(generatedSource?.SourceText.ToString().Trim() ?? string.Empty, ""))
-            .IsEqualTo(FindEmptyLines().Replace(expectedOutput.Trim(), ""));
+        // Act
+        GeneratorDriverRunResult runResult = runner.AddGenerator<PermissionsStoreGenerator>();
+
+        // Assert
+        await Assert.That(runResult).HasSourceTextEqualTo(
+            $"{repoName}.g.cs",
+            expectedOutput,
+            ignoreWhiteSpace: true,
+            withTrimming: true
+        );
     }
     
     // -----------------------------------------------------------------------------------------------------------------
@@ -342,8 +349,6 @@ public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<P
         }
         """;
     #endregion
-    
-    
 
     #region GenerateAllPermissionsMethod Test
     [LanguageInjection("csharp")] public const string GenerateAllPermissionsMethod = """
@@ -401,8 +406,5 @@ public partial class PermissionsStoreGeneratorTests : IncrementalGeneratorTest<P
         }
         """;
     #endregion
-    
-    [GeneratedRegex(@"^\s*$\n|\r", RegexOptions.Multiline)]
-    private static partial Regex FindEmptyLines();
 
 }
