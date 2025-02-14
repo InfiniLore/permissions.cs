@@ -1,7 +1,7 @@
 ﻿// ---------------------------------------------------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------------------------------------------------
-using InfiniLore.Permissions.Generators.Helpers;
+using CodeOfChaos.GeneratorTools;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 
 namespace InfiniLore.Permissions.Generators;
@@ -114,7 +113,7 @@ public class PermissionsStoreGenerator : IIncrementalGenerator {
     /// </param>
     private static void GenerateSources(SourceProductionContext context, (Compilation compilation, ImmutableArray<PermissionsStoreDto> classDeclarations) source) {
         (_, ImmutableArray<PermissionsStoreDto> classDeclarations) = source;
-        StringBuilder builder = new();
+        GeneratorStringBuilder builder = new();
         
         // Throws a diagnostic error if the class is not partial (exclude from the output)
         IEnumerable<PermissionsStoreDto> didNotThrowErrors = classDeclarations
@@ -127,28 +126,24 @@ public class PermissionsStoreGenerator : IIncrementalGenerator {
                 .AppendLine("using System.Collections.Generic;")
                 .AppendLine($"namespace {repoDto.Namespace};")
                 .AppendLine()
-                .AppendLine($"public partial class {repoDto.ClassName} {{");
-
-            // Generate the properties
-            foreach (PermissionsPropertyDto propertyDto in repoDto.Properties) {
-                // Add the property to the class
-                builder.IndentLine(1, propertyDto.ToPropertyString());
-            }
-            builder.AppendLine();
+                .AppendLine($"public partial class {repoDto.ClassName} {{")
+                
+                // Generates the properties for the class
+                .ForEachAppendLineIndented(repoDto.Properties, propertyDto => propertyDto.ToPropertyString())
+                .AppendLine();
+            
 
             if (repoDto.GenerateAllPermissionsMethod) {
                 // Generate a property which holds an array of all of the property's values;
-                builder.IndentLine(1, "public static IEnumerable<string> GetAllPermissions() {");
-                foreach (PermissionsPropertyDto propertyDto in repoDto.Properties) {
-                    // Add the property to the class
-                    builder.IndentLine(2, propertyDto.ToYieldString());
-                }
-                builder.IndentLine(1, "}");
+                builder.Indent(g => g
+                    .AppendLine("public static IEnumerable<string> GetAllPermissions() {")
+                    .ForEachAppendLineIndented(repoDto.Properties, propertyDto => propertyDto.ToYieldString())
+                    .AppendLine("}")
+                );
             }
 
             builder.AppendLine("}");
-            context.AddSource($"{repoDto.ClassName}.g.cs", builder.ToString());
-            builder.Clear();
+            context.AddSource($"{repoDto.ClassName}.g.cs", builder.ToStringAndClear());
         }
     }
 }

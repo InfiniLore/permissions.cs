@@ -9,6 +9,10 @@
     <ItemGroup>
         <ProjectReference Include="..\InfiniLore.Permissions.Generators\InfiniLore.Permissions.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\InfiniLore.Permissions\InfiniLore.Permissions.csproj"/>
+
+        <!-- Ugly, but this is because of some weirdness with how analyzers are imported through a project reference -->
+        <PackageReference Include="CodeOfChaos.GeneratorTools" Version="1.4.0" GeneratePathProperty="true" PrivateAssets="all" />
+        <Analyzer Include="$(PkgCodeOfChaos_GeneratorTools)\lib\netstandard2.0\*.dll" />
     </ItemGroup>
 
 </Project>
